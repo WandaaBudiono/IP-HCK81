@@ -1,0 +1,33 @@
+{
+  "name": "ip-hck81",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx jest --verbose --detectOpenHandles --forceExit --runInBand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WandaaBudiono/IP-HCK81.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WandaaBudiono/IP-HCK81/issues"
+  },
+  "homepage": "https://github.com/WandaaBudiono/IP-HCK81#readme",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.14.1",
+    "sequelize": "^6.37.6"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "sequelize-cli": "^6.6.2",
+    "supertest": "^7.1.0"
+  }
+}
