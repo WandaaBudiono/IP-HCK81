@@ -1,5 +1,5 @@
 const { Favorite, User } = require("../models");
-const { comparePassword } = require("../helper/bcrypt");
+const { comparePassword, hashPassword } = require("../helper/bcrypt");
 const { signToken } = require("../helper/jwt");
 
 module.exports = class userController {
@@ -25,6 +25,7 @@ module.exports = class userController {
         house: newUser.house,
       });
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
