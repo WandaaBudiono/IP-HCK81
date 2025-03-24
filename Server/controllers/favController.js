@@ -20,17 +20,42 @@ module.exports = class favController {
   static async add(req, res, next) {
     try {
       req.body.UserId = req.user.id;
-      const { characterName, house, imageUrl, UserId } = req.body;
-      if (!characterName || !UserId) {
+      const { CharacterId } = req.params;
+      const { UserId } = req.body;
+
+      if (!CharacterId || !UserId) {
         return res
           .status(400)
-          .json({ message: "characterName and UserId are required" });
+          .json({ message: "CharacterId and UserId are required" });
       }
 
+      // Fetch karakter dari API eksternal
+      const response = await axios.get(
+        "https://hp-api.onrender.com/api/characters"
+      );
+      const character = response.data.find((char) => char.id === CharacterId);
+
+      if (!character) {
+        return res.status(404).json({ message: "Character not found" });
+      }
+
+      // Cek apakah karakter sudah ada di favorit untuk user yang sama
+      const existingFavorite = await Favorite.findOne({
+        where: { CharacterId, UserId },
+      });
+
+      if (existingFavorite) {
+        return res
+          .status(400)
+          .json({ message: "Character is already in favorites" });
+      }
+
+      // Simpan karakter ke database sebagai favorit
       const newFavorite = await Favorite.create({
-        characterName,
-        house,
-        imageUrl,
+        CharacterId: character.id,
+        characterName: character.name,
+        house: character.house || "Unknown",
+        imageUrl: character.image || "",
         UserId,
       });
 

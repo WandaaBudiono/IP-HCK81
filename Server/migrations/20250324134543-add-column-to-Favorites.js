@@ -4,7 +4,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn("Favorites", "CharacterId", {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
       allowNull: true,
     });
   },

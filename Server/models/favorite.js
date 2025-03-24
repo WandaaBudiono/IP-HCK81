@@ -66,14 +66,14 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       CharacterId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         validate: {
           notNull: {
             msg: "Character ID is required",
           },
-          isInt: {
-            msg: "Character ID must be an integer",
+          notEmpty: {
+            msg: "Character ID cannot be null",
           },
         },
       },
