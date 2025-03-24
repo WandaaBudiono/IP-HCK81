@@ -7,6 +7,7 @@ router.use(authentication);
 
 router.get("/", favController.getAll);
 router.post("/:CharacterId", favController.add);
+router.get("/:CharacterId", favController.getCharacterDetail);
 
 // Export the router
 module.exports = router;

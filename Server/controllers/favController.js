@@ -29,7 +29,6 @@ module.exports = class favController {
           .json({ message: "CharacterId and UserId are required" });
       }
 
-      // Fetch karakter dari API eksternal
       const response = await axios.get(
         "https://hp-api.onrender.com/api/characters"
       );
@@ -39,7 +38,6 @@ module.exports = class favController {
         return res.status(404).json({ message: "Character not found" });
       }
 
-      // Cek apakah karakter sudah ada di favorit untuk user yang sama
       const existingFavorite = await Favorite.findOne({
         where: { CharacterId, UserId },
       });
@@ -50,7 +48,6 @@ module.exports = class favController {
           .json({ message: "Character is already in favorites" });
       }
 
-      // Simpan karakter ke database sebagai favorit
       const newFavorite = await Favorite.create({
         CharacterId: character.id,
         characterName: character.name,
@@ -68,16 +65,31 @@ module.exports = class favController {
     }
   }
 
-  static async getId(req, res, next) {
+  static async getCharacterDetail(req, res, next) {
     try {
-      const { id } = req.params;
-      const cuisine = await Cuisine.findByPk(id);
-      if (!cuisine)
-        throw { name: "NotFound", message: `Cuisine with ID ${id} not found` };
+      const { CharacterId } = req.params;
+      const response = await axios.get(
+        "https://hp-api.onrender.com/api/characters"
+      );
+      const character = response.data.find((char) => char.id === CharacterId);
 
-      res
-        .status(200)
-        .json({ message: "Data retrieved successfully", data: cuisine });
+      if (!character) {
+        return res.status(404).json({ message: "Character not found" });
+      }
+
+      res.status(200).json({
+        message: "Character detail retrieved successfully",
+        data: {
+          id: character.id,
+          name: character.name,
+          house: character.house || "Unknown",
+          species: character.species,
+          gender: character.gender,
+          patronus: character.patronus || "Unknown",
+          actor: character.actor || "Unknown",
+          imageUrl: character.image || "",
+        },
+      });
     } catch (error) {
       next(error);
     }
