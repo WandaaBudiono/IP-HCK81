@@ -1,0 +1,11 @@
+// require("dotenv").config();
+const router = require("express").Router();
+const { verifyToken } = require("../helper/jwt");
+
+// const favRoutes = require("./favorite");
+const userRoutes = require("./user");
+
+// router.use("/fav", favRoutes);
+router.use("/users", userRoutes);
+
+module.exports = router;
