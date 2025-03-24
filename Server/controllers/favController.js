@@ -1,16 +1,18 @@
-const { Cuisine, User } = require("../models");
+const { Favorite, User } = require("../models");
 const { Op } = require("sequelize");
+const axios = require("axios");
 
-module.exports = class cuisinesController {
+module.exports = class favController {
   static async getAll(req, res, next) {
     try {
-      const cuisines = await Cuisine.findAll({
-        include: { model: User, attributes: { exclude: ["password"] } },
-      });
+      const response = await axios.get(
+        "https://hp-api.onrender.com/api/characters"
+      );
       res
         .status(200)
-        .json({ message: "Data retrieved successfully", data: cuisines });
+        .json({ message: "Data retrieved successfully", data: response.data });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
