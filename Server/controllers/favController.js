@@ -19,11 +19,24 @@ module.exports = class favController {
 
   static async add(req, res, next) {
     try {
-      req.body.AuthorId = req.user.id;
-      const cuisine = await Cuisine.create(req.body);
+      req.body.UserId = req.user.id;
+      const { characterName, house, imageUrl, UserId } = req.body;
+      if (!characterName || !UserId) {
+        return res
+          .status(400)
+          .json({ message: "characterName and UserId are required" });
+      }
+
+      const newFavorite = await Favorite.create({
+        characterName,
+        house,
+        imageUrl,
+        UserId,
+      });
+
       res.status(201).json({
-        message: `Cuisine ${cuisine.name} created successfully`,
-        data: cuisine,
+        message: "Favorite character added successfully",
+        data: newFavorite,
       });
     } catch (error) {
       next(error);

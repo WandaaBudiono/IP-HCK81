@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Favorite.belongsTo(models.User, { foreignKey: "UserId" });
     }
   }
   Favorite.init(
@@ -61,6 +62,18 @@ module.exports = (sequelize, DataTypes) => {
           },
           isInt: {
             msg: "User ID must be an integer",
+          },
+        },
+      },
+      CharacterId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Character ID is required",
+          },
+          isInt: {
+            msg: "Character ID must be an integer",
           },
         },
       },
