@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Favorite extends Model {
     /**
@@ -13,15 +11,64 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  Favorite.init({
-    characterName: DataTypes.STRING,
-    house: DataTypes.STRING,
-    imageUrl: DataTypes.STRING,
-    house: DataTypes.STRING,
-    UserId: DataTypes.INTEGER
-  }, {
-    sequelize,
-    modelName: 'Favorite',
-  });
+  Favorite.init(
+    {
+      characterName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Character name is required",
+          },
+          notNull: {
+            msg: "Character name cannot be null",
+          },
+        },
+      },
+      house: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "House name is required",
+          },
+          notNull: {
+            msg: "House cannot be null",
+          },
+        },
+      },
+      imageUrl: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Image URL is required",
+          },
+          notNull: {
+            msg: "Image URL cannot be null",
+          },
+          isUrl: {
+            msg: "Please provide a valid URL",
+          },
+        },
+      },
+      UserId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "User ID is required",
+          },
+          isInt: {
+            msg: "User ID must be an integer",
+          },
+        },
+      },
+    },
+    {
+      sequelize,
+      modelName: "Favorite",
+    }
+  );
   return Favorite;
 };
