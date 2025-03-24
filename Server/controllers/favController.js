@@ -95,32 +95,25 @@ module.exports = class favController {
     }
   }
 
-  static async updateById(req, res, next) {
+  static async deleteFavorite(req, res, next) {
     try {
-      const { id } = req.params;
-      const cuisine = await Cuisine.findByPk(id);
-      if (!cuisine)
-        throw { name: "NotFound", message: `Cuisine with ID ${id} not found` };
+      const { CharacterId } = req.params;
+      const UserId = req.user.id;
 
-      await cuisine.update(req.body);
-      res.status(200).json({
-        message: `Cuisine ${cuisine.name} updated successfully`,
-        data: cuisine,
+      const favorite = await Favorite.findOne({
+        where: { CharacterId, UserId },
       });
-    } catch (error) {
-      next(error);
-    }
-  }
 
-  static async deleteCuisineById(req, res, next) {
-    try {
-      const { id } = req.params;
-      const cuisine = await Cuisine.findByPk(id);
-      if (!cuisine)
-        throw { name: "NotFound", message: `Cuisine with ID ${id} not found` };
+      if (!favorite) {
+        return res
+          .status(404)
+          .json({ message: "Favorite character not found" });
+      }
+      await favorite.destroy();
 
-      await cuisine.destroy();
-      res.status(200).json({ message: `${cuisine.name} success to delete` });
+      res
+        .status(200)
+        .json({ message: "Favorite character removed successfully" });
     } catch (error) {
       next(error);
     }
@@ -185,46 +178,6 @@ module.exports = class favController {
       res
         .status(200)
         .json({ message: "Data retrieved successfully", data: cuisine });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async updateImage(req, res, next) {
-    try {
-      const { id } = req.params;
-      const cuisine = await Cuisine.findByPk(id);
-      if (!cuisine) {
-        throw { name: `NotFound`, message: `Cuisine id ${id} not found` };
-      }
-
-      if (!req.file) {
-        throw { name: `BadRequest`, message: `Image is required` };
-      }
-
-      const img = `data:${req.file.mimetype};base64,${req.file.buffer.toString(
-        `base64`
-      )}`;
-
-      const result = await cloudinary.uploader.upload(img, {
-        public_id: req.file.originalname.split(".")[0],
-        folder: "Cuisine-cover",
-      });
-
-      await Cuisine.update(
-        {
-          imgUrl: result.secure_url,
-        },
-        {
-          where: {
-            id: id,
-          },
-        }
-      );
-
-      res.json({
-        message: `Image ${cuisine.name} success to update`,
-      });
     } catch (error) {
       next(error);
     }

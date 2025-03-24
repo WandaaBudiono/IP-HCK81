@@ -8,6 +8,7 @@ router.use(authentication);
 router.get("/", favController.getAll);
 router.post("/:CharacterId", favController.add);
 router.get("/:CharacterId", favController.getCharacterDetail);
+router.delete("/:CharacterId", favController.deleteFavorite);
 
 // Export the router
 module.exports = router;
