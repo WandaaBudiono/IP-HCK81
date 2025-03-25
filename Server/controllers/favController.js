@@ -3,16 +3,57 @@ const { Op } = require("sequelize");
 const axios = require("axios");
 const { getGroqChatCompletion } = require("../helper/groqhelper");
 require("dotenv").config();
+const { sendWelcomeEmail } = require("../helper/emailService");
 
 module.exports = class favController {
   static async getAll(req, res, next) {
     try {
+      let { house, q, pageNumber, pageSize, sortBy, sortOrder } = req.query;
+
+      // Ambil data dari API eksternal
       const response = await axios.get(
         "https://hp-api.onrender.com/api/characters"
       );
-      res
-        .status(200)
-        .json({ message: "Data retrieved successfully", data: response.data });
+      let characters = response.data; // Semua data karakter dari API
+
+      // FILTERING: Filter berdasarkan house (misalnya Gryffindor, Slytherin)
+      if (house) {
+        characters = characters.filter(
+          (char) => char.house.toLowerCase() === house.toLowerCase()
+        );
+      }
+
+      // FILTERING: Cari berdasarkan nama (q = query search)
+      if (q) {
+        characters = characters.filter((char) =>
+          char.name.toLowerCase().includes(q.toLowerCase())
+        );
+      }
+
+      // SORTING: Urutkan berdasarkan field tertentu (misalnya name, yearOfBirth)
+      if (sortBy) {
+        sortOrder = sortOrder && sortOrder.toUpperCase() === "DESC" ? -1 : 1;
+        characters.sort((a, b) => {
+          if (a[sortBy] < b[sortBy]) return -sortOrder;
+          if (a[sortBy] > b[sortBy]) return sortOrder;
+          return 0;
+        });
+      }
+
+      // PAGINATION: Ambil sesuai pageNumber & pageSize
+      const page = Number(pageNumber) || 1;
+      const size = Number(pageSize) || 10;
+      const totalItems = characters.length;
+      const totalPages = Math.ceil(totalItems / size);
+      const paginatedData = characters.slice((page - 1) * size, page * size);
+
+      res.status(200).json({
+        message: "Data retrieved successfully",
+        totalItems,
+        totalPages,
+        currentPage: page,
+        data: paginatedData,
+      });
     } catch (error) {
       console.log(error);
       next(error);
@@ -123,20 +164,46 @@ module.exports = class favController {
 
   static async sortHat(req, res, next) {
     try {
+      const userId = req.user.id;
       const { answers } = req.body;
 
       if (!answers || !Array.isArray(answers)) {
-        return res.status(400).json({ error: "Invalid answers format" });
+        return res.status(400).json({ error: "Invalid input" });
       }
 
       const chatCompletion = await getGroqChatCompletion(answers);
-      console.log("Groq Response:", JSON.stringify(chatCompletion, null, 2)); // Debugging
+      console.log(
+        "Groq API Response:",
+        JSON.stringify(chatCompletion, null, 2)
+      );
 
       const houseData = chatCompletion.choices?.[0]?.message?.content;
-      const house =
-        typeof houseData === "string" ? JSON.parse(houseData) : houseData;
 
-      res.json({ house });
+      if (!houseData) {
+        return res.status(400).json({ error: "Invalid Groq response" });
+      }
+
+      const parsedHouse = JSON.parse(houseData);
+
+      if (!parsedHouse.house || typeof parsedHouse.house !== "string") {
+        return res.status(400).json({ error: "House must be a string" });
+      }
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      user.house = parsedHouse.house;
+      await user.save();
+
+      await sendWelcomeEmail(user.email, user.username, user.house);
+
+      res.status(201).json({
+        house: parsedHouse.house,
+        explanation: parsedHouse.explanation,
+        message: "Sorting completed and email sent!",
+      });
     } catch (error) {
       console.error("Groq API Error:", error.response?.data || error.message);
       next(error);

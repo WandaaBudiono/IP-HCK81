@@ -8,24 +8,20 @@ module.exports = class userController {
     try {
       const { username, email, password, house } = req.body;
 
-      if (!username || !email || !password || !house) {
+      if (!username || !email || !password) {
         return res.status(400).json({ message: "All fields are required" });
       }
 
       const newUser = await User.create({
         username,
         email,
-        password: hashPassword(password),
-        house,
+        password,
       });
-
-      await sendWelcomeEmail(newUser.email, newUser.username, newUser.house);
 
       res.status(201).json({
         id: newUser.id,
         username: newUser.username,
         email: newUser.email,
-        house: newUser.house,
       });
     } catch (error) {
       console.log(error);
@@ -41,6 +37,14 @@ module.exports = class userController {
       if (!password)
         return res.status(401).json({ message: "Password is required" });
       const user = await User.findOne({ where: { email } });
+      console.log("Comparing:", password, "vs", user.password);
+      console.log("Match result:", comparePassword(password, user.password));
+
+      console.log(
+        "Login - Password Match:",
+        comparePassword(password, user.password)
+      );
+      console.log(password, user.password);
       if (!user || !comparePassword(password, user.password)) {
         return res.status(401).json({ message: "Email/Password is Invalid" });
       }

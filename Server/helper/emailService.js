@@ -9,12 +9,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendWelcomeEmail = async (
-  toEmail,
-  username,
-  house,
-  sortingExplanation
-) => {
+const sendWelcomeEmail = async (toEmail, username, house) => {
   try {
     await transporter.sendMail({
       from: `"Sorting Hat AI" <${process.env.EMAIL_USER}>`,

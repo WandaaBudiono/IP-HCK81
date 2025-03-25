@@ -8,33 +8,38 @@ async function getGroqChatCompletion(answers) {
     messages: [
       {
         role: "system",
-        content: `You are a Sorting Hat AI that classifies users into Hogwarts houses. 
-        Your response **MUST** be a valid JSON **array**, nothing else.
+        content: `You are a Sorting Hat AI that classifies users into Hogwarts houses.
+        Your response **MUST** be a valid JSON object, nothing else.
 
         STRICTLY return in this format:
-        ["house_name", "explanation"]
+        {
+          "house": "HouseName",
+          "explanation": "A short explanation of why they fit this house."
+        }
 
         Example:
-        ["Ravenclaw", "Your intelligence and curiosity make you a perfect fit for Ravenclaw."]
+        {
+          "house": "Ravenclaw",
+          "explanation": "Your intelligence and curiosity make you a perfect fit for Ravenclaw."
+        }
 
         **RULES:**
-        - The first item **must be only the house name** ("Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin").
-        - The second item **must be a short explanation** (1-2 sentences).
+        - "house" must be one of: "Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin".
+        - "explanation" must be a short string (1-2 sentences).
         - **DO NOT** return extra text, markdown, or line breaks.
-        - **DO NOT** wrap the response in an object.
-        - **ONLY return the JSON array.**
-        
-        If you fail to follow this format, the Sorting Hat will be **destroyed in a fire**.`,
+        - **DO NOT** return an array.
+        - **ONLY return the JSON object.**
+        `,
       },
       {
         role: "user",
-        content: `Based on these answers, which Hogwarts house is the best fit? ${answers.join(
-          ", "
+        content: `Based on these answers, which Hogwarts house is the best fit? ${JSON.stringify(
+          answers
         )}`,
       },
     ],
     model: "llama-3.3-70b-versatile",
-    response_format: { type: "json_object" },
+    response_format: { type: "json_object" }, // Ini memastikan output selalu objek
   });
 }
 

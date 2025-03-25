@@ -5,8 +5,9 @@ const authentication = require("../middleware/authentication");
 const router = express.Router();
 router.use(authentication);
 
-router.get("/", favController.getAll);
+router.post("/sortHat", favController.sortHat);
 router.post("/:CharacterId", favController.add);
+router.get("/", favController.getAll);
 router.get("/:CharacterId", favController.getCharacterDetail);
 router.delete("/:CharacterId", favController.deleteFavorite);
 

@@ -42,7 +42,10 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      house: DataTypes.STRING,
+      house: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
     {
       sequelize,
