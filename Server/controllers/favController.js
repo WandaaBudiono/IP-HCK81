@@ -130,11 +130,15 @@ module.exports = class favController {
       }
 
       const chatCompletion = await getGroqChatCompletion(answers);
+      console.log("Groq Response:", JSON.stringify(chatCompletion, null, 2)); // Debugging
+
+      const houseData = chatCompletion.choices?.[0]?.message?.content;
       const house =
-        chatCompletion.choices[0]?.message?.content || "No response";
+        typeof houseData === "string" ? JSON.parse(houseData) : houseData;
 
       res.json({ house });
     } catch (error) {
+      console.error("Groq API Error:", error.response?.data || error.message);
       next(error);
     }
   }

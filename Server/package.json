@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx jest --verbose --detectOpenHandles --forceExit --runInBand"
+    "test": "npx jest --verbose --detectOpenHandles --forceExit --runInBand",
+    "dev": "node --watch bin/www"
   },
   "repository": {
     "type": "git",
