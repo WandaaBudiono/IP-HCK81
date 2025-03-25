@@ -19,11 +19,7 @@ function errorHandler(err, req, res, next) {
   }
 
   if (err.name === "BadRequest") {
-    if (err.message === "Email/Password is invalid") {
-      res.status(401).json({ message: err.message });
-    } else {
-      res.status(400).json({ message: err.message });
-    }
+    res.status(400).json({ message: err.message });
     return;
   }
 
@@ -39,6 +35,7 @@ function errorHandler(err, req, res, next) {
     res.status(403).json({ message: err.message });
     return;
   }
+
   res.status(500).json({ message: "Internal server error from error handler" });
   return;
 }

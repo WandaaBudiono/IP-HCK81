@@ -36,18 +36,12 @@ module.exports = class userController {
     try {
       const { email, password } = req.body;
 
-      if (!email) return res.status(401).json({ message: "Email is required" });
+      if (!email) return res.status(400).json({ message: "Email is required" });
       if (!password)
-        return res.status(401).json({ message: "Password is required" });
-      const user = await User.findOne({ where: { email } });
-      console.log("Comparing:", password, "vs", user.password);
-      console.log("Match result:", comparePassword(password, user.password));
+        return res.status(400).json({ message: "Password is required" });
 
-      console.log(
-        "Login - Password Match:",
-        comparePassword(password, user.password)
-      );
-      console.log(password, user.password);
+      const user = await User.findOne({ where: { email } });
+
       if (!user || !comparePassword(password, user.password)) {
         return res.status(401).json({ message: "Email/Password is Invalid" });
       }
