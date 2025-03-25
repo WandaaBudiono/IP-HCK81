@@ -1,6 +1,8 @@
 const { Favorite, User } = require("../models");
 const { Op } = require("sequelize");
 const axios = require("axios");
+const { getGroqChatCompletion } = require("../helper/groqhelper");
+require("dotenv").config();
 
 module.exports = class favController {
   static async getAll(req, res, next) {
@@ -114,6 +116,24 @@ module.exports = class favController {
       res
         .status(200)
         .json({ message: "Favorite character removed successfully" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async sortHat(req, res, next) {
+    try {
+      const { answers } = req.body;
+
+      if (!answers || !Array.isArray(answers)) {
+        return res.status(400).json({ error: "Invalid answers format" });
+      }
+
+      const chatCompletion = await getGroqChatCompletion(answers);
+      const house =
+        chatCompletion.choices[0]?.message?.content || "No response";
+
+      res.json({ house });
     } catch (error) {
       next(error);
     }
