@@ -1,6 +1,7 @@
 const { Favorite, User } = require("../models");
 const { comparePassword, hashPassword } = require("../helper/bcrypt");
 const { signToken } = require("../helper/jwt");
+const { sendWelcomeEmail } = require("../helper/emailService");
 
 module.exports = class userController {
   static async register(req, res) {
@@ -17,6 +18,8 @@ module.exports = class userController {
         password: hashPassword(password),
         house,
       });
+
+      await sendWelcomeEmail(newUser.email, newUser.username, newUser.house);
 
       res.status(201).json({
         id: newUser.id,
