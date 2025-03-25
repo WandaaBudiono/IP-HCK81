@@ -10,27 +10,22 @@ module.exports = class favController {
     try {
       let { house, q, pageNumber, pageSize, sortBy, sortOrder } = req.query;
 
-      // Ambil data dari API eksternal
       const response = await axios.get(
         "https://hp-api.onrender.com/api/characters"
       );
-      let characters = response.data; // Semua data karakter dari API
+      let characters = response.data;
 
-      // FILTERING: Filter berdasarkan house (misalnya Gryffindor, Slytherin)
       if (house) {
         characters = characters.filter(
           (char) => char.house.toLowerCase() === house.toLowerCase()
         );
       }
-
-      // FILTERING: Cari berdasarkan nama (q = query search)
       if (q) {
         characters = characters.filter((char) =>
           char.name.toLowerCase().includes(q.toLowerCase())
         );
       }
 
-      // SORTING: Urutkan berdasarkan field tertentu (misalnya name, yearOfBirth)
       if (sortBy) {
         sortOrder = sortOrder && sortOrder.toUpperCase() === "DESC" ? -1 : 1;
         characters.sort((a, b) => {
@@ -40,7 +35,6 @@ module.exports = class favController {
         });
       }
 
-      // PAGINATION: Ambil sesuai pageNumber & pageSize
       const page = Number(pageNumber) || 1;
       const size = Number(pageSize) || 10;
       const totalItems = characters.length;
@@ -206,70 +200,6 @@ module.exports = class favController {
       });
     } catch (error) {
       console.error("Groq API Error:", error.response?.data || error.message);
-      next(error);
-    }
-  }
-
-  static async getAllPublic(req, res, next) {
-    try {
-      let { CategoryId, q, pageNumber, pageSize, sortBy, sortOrder } =
-        req.query;
-
-      const paramQuerySQL = {
-        where: {},
-        order: [["createdAt", "DESC"]],
-        limit: 10,
-        offset: 0,
-      };
-
-      if (CategoryId) {
-        paramQuerySQL.where.CategoryId = Number(CategoryId);
-      }
-
-      if (q) {
-        paramQuerySQL.where.name = {
-          [Op.iLike]: `%${q}%`,
-        };
-      }
-
-      if (
-        sortBy &&
-        sortOrder &&
-        ["ASC", "DESC"].includes(sortOrder.toUpperCase())
-      ) {
-        paramQuerySQL.order = [[sortBy, sortOrder.toUpperCase()]];
-      }
-
-      const page = Number(pageNumber) || 1;
-      const size = Number(pageSize) || 10;
-      paramQuerySQL.limit = size;
-      paramQuerySQL.offset = (page - 1) * size;
-
-      const { count, rows } = await Cuisine.findAndCountAll(paramQuerySQL);
-
-      res.status(200).json({
-        message: "Data retrieved successfully",
-        totalItems: count,
-        totalPages: Math.ceil(count / paramQuerySQL.limit),
-        currentPage: page,
-        data: rows,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async getIdPublic(req, res, next) {
-    try {
-      const { id } = req.params;
-      const cuisine = await Cuisine.findByPk(id);
-      if (!cuisine)
-        throw { name: "NotFound", message: `Cuisine with ID ${id} not found` };
-
-      res
-        .status(200)
-        .json({ message: "Data retrieved successfully", data: cuisine });
-    } catch (error) {
       next(error);
     }
   }
