@@ -1,6 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 const { hashPassword } = require("../helper/bcrypt");
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -21,30 +22,32 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           isEmail: true,
-          notEmpty: {
-            msg: "Email Required",
-          },
-          notNull: {
-            msg: "Email Required",
-          },
+          notEmpty: { msg: "Email is required" },
+          notNull: { msg: "Email is required" },
         },
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true, // Bisa null untuk akun Google
         validate: {
-          len: [5],
-          notEmpty: {
-            msg: "Password Required",
+          len: {
+            args: [5],
+            msg: "Password must be at least 5 characters long",
           },
-          notNull: {
-            msg: "Password Required",
+          notEmpty(value) {
+            if (!this.isGoogleAccount && !value) {
+              throw new Error("Password is required for non-Google accounts");
+            }
           },
         },
       },
       house: {
         type: DataTypes.STRING,
         allowNull: true,
+      },
+      isGoogleAccount: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
       },
     },
     {

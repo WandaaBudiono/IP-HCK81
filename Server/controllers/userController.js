@@ -1,7 +1,10 @@
-const { Favorite, User } = require("../models");
-const { comparePassword, hashPassword } = require("../helper/bcrypt");
+const { User } = require("../models");
+const { comparePassword } = require("../helper/bcrypt");
 const { signToken } = require("../helper/jwt");
-const { sendWelcomeEmail } = require("../helper/emailService");
+const { OAuth2Client } = require("google-auth-library");
+require("dotenv").config();
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 module.exports = class userController {
   static async register(req, res) {
@@ -53,6 +56,46 @@ module.exports = class userController {
       res.status(200).json({ access_token });
     } catch (error) {
       console.log(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+
+  static async googleLogin(req, res) {
+    try {
+      const { googleToken } = req.body;
+
+      const ticket = await client.verifyIdToken({
+        idToken: googleToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+
+      const [user, created] = await User.findOrCreate({
+        where: { email: payload.email },
+        defaults: {
+          username: payload.name,
+          email: payload.email,
+          password: "google_id",
+          house: null,
+          isGoogleAccount: true,
+        },
+        hooks: false,
+      });
+
+      const access_token = signToken({ id: user.id });
+
+      res.status(created ? 201 : 200).json({
+        message: created ? "User created successfully" : "User logged in",
+        access_token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          picture: user.picture,
+        },
+      });
+    } catch (error) {
+      console.error("Google Login Error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }
