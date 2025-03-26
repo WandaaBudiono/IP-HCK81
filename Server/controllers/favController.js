@@ -203,4 +203,23 @@ module.exports = class favController {
       next(error);
     }
   }
+
+  static async getFavorites(req, res, next) {
+    try {
+      const UserId = req.user.id; // Get the logged-in user's ID from req.user
+
+      const favorites = await Favorite.findAll({
+        where: { UserId }, // Filter by the logged-in user's ID
+        attributes: { exclude: ["UserId"] }, // Exclude the UserId field from the response
+      });
+
+      res.status(200).json({
+        message: "Favorites retrieved successfully",
+        data: favorites,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
 };
