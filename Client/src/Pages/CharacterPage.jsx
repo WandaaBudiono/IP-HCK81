@@ -1,4 +1,3 @@
-// Pages/CharacterPage.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -16,21 +15,17 @@ export default function CharacterList() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // State lokal hanya untuk input sebelum di-submit
   const [searchInput, setSearchInput] = useState("");
 
-  // Ambil data dari Redux store
   const { characters, loading, error, searchQuery, houseFilter, pagination } =
     useSelector((state) => state.characters);
 
-  // Panggil fetchCharacters setiap kali searchQuery, houseFilter, atau currentPage berubah
   useEffect(() => {
     dispatch(fetchCharacters());
   }, [dispatch, searchQuery, houseFilter, pagination.currentPage]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // set search query di Redux
     dispatch(setSearchQuery(searchInput));
   };
 
@@ -64,7 +59,6 @@ export default function CharacterList() {
     navigate(`/character/${characterId}`);
   };
 
-  // Opsi house
   const houseOptions = [
     { label: "All Houses", value: "" },
     { label: "Gryffindor", value: "Gryffindor" },
