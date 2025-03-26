@@ -1,78 +1,45 @@
-import { useState, useEffect, useCallback } from "react";
+// Pages/CharacterPage.jsx
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchCharacters,
+  setSearchQuery,
+  setHouseFilter,
+  setCurrentPage,
+} from "../Store/charactersSlice";
 
 const baseURL = "http://localhost:3000/fav";
 
 export default function CharacterList() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [characters, setCharacters] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
+  // State lokal hanya untuk input sebelum di-submit
   const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [houseFilter, setHouseFilter] = useState("");
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-  });
 
-  const houseOptions = [
-    { label: "All Houses", value: "" },
-    { label: "Gryffindor", value: "Gryffindor" },
-    { label: "Ravenclaw", value: "Ravenclaw" },
-    { label: "Hufflepuff", value: "Hufflepuff" },
-    { label: "Slytherin", value: "Slytherin" },
-  ];
+  // Ambil data dari Redux store
+  const { characters, loading, error, searchQuery, houseFilter, pagination } =
+    useSelector((state) => state.characters);
 
-  const fetchCharacters = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      const params = {
-        pageNumber: pagination.currentPage,
-      };
-      if (searchQuery) params.q = searchQuery;
-      if (houseFilter) params.house = houseFilter;
-
-      const { data } = await axios.get(baseURL, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        params,
-      });
-
-      setCharacters(data.data);
-      setPagination({
-        currentPage: data.currentPage || 1,
-        totalPages: data.totalPages || 1,
-      });
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to fetch characters");
-      setLoading(false);
-    }
-  }, [searchQuery, houseFilter, pagination.currentPage]);
-
+  // Panggil fetchCharacters setiap kali searchQuery, houseFilter, atau currentPage berubah
   useEffect(() => {
-    fetchCharacters();
-  }, [fetchCharacters]);
+    dispatch(fetchCharacters());
+  }, [dispatch, searchQuery, houseFilter, pagination.currentPage]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setSearchQuery(searchInput);
-    setPagination({ currentPage: 1, totalPages: 1 });
+    // set search query di Redux
+    dispatch(setSearchQuery(searchInput));
   };
 
   const handleHouseChange = (e) => {
-    setHouseFilter(e.target.value);
-    setPagination({ currentPage: 1, totalPages: 1 });
+    dispatch(setHouseFilter(e.target.value));
   };
 
   const handlePageChange = (pageNumber) => {
-    setPagination((prev) => ({ ...prev, currentPage: pageNumber }));
+    dispatch(setCurrentPage(pageNumber));
   };
 
   const handleAddFavorite = async (characterId) => {
@@ -96,6 +63,15 @@ export default function CharacterList() {
   const handleDetail = (characterId) => {
     navigate(`/character/${characterId}`);
   };
+
+  // Opsi house
+  const houseOptions = [
+    { label: "All Houses", value: "" },
+    { label: "Gryffindor", value: "Gryffindor" },
+    { label: "Ravenclaw", value: "Ravenclaw" },
+    { label: "Hufflepuff", value: "Hufflepuff" },
+    { label: "Slytherin", value: "Slytherin" },
+  ];
 
   return (
     <div className="p-4">
