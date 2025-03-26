@@ -177,7 +177,12 @@ module.exports = class favController {
         return res.status(400).json({ error: "Invalid Groq response" });
       }
 
-      const parsedHouse = JSON.parse(houseData);
+      let parsedHouse;
+      try {
+        parsedHouse = JSON.parse(houseData);
+      } catch (error) {
+        return res.status(400).json({ error: "Invalid Groq response format" });
+      }
 
       if (!parsedHouse.house || typeof parsedHouse.house !== "string") {
         return res.status(400).json({ error: "House must be a string" });
@@ -200,6 +205,25 @@ module.exports = class favController {
       });
     } catch (error) {
       console.error("Groq API Error:", error.response?.data || error.message);
+      next(error);
+    }
+  }
+
+  static async getFavorites(req, res, next) {
+    try {
+      const UserId = req.user.id;
+
+      const favorites = await Favorite.findAll({
+        where: { UserId },
+        attributes: { exclude: ["UserId"] },
+      });
+
+      res.status(200).json({
+        message: "Favorites retrieved successfully",
+        data: favorites,
+      });
+    } catch (error) {
+      console.log(error);
       next(error);
     }
   }

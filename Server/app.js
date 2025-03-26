@@ -13,5 +13,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 app.use(errorHandler);
+if (process.env.NODE_ENV === "test") {
+  app.use((req, res, next) => {
+    req.user = { id: "1" };
+    next();
+  });
+}
 
 module.exports = app;
