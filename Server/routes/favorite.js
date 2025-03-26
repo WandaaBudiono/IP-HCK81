@@ -13,5 +13,4 @@ router.get("/user", favController.getFavorites);
 router.get("/:CharacterId", favController.getCharacterDetail);
 router.delete("/:CharacterId", favController.deleteFavorite);
 
-// Export the router
 module.exports = router;
