@@ -66,6 +66,80 @@ afterAll(async () => {
   }
 });
 
+describe("GET /fav (getAll)", () => {
+  it("should filter characters by house and paginate results", async () => {
+    const characters = [
+      { id: "1", name: "Harry Potter", house: "Gryffindor", image: "url1" },
+      { id: "2", name: "Draco Malfoy", house: "Slytherin", image: "url2" },
+      { id: "3", name: "Hermione Granger", house: "Gryffindor", image: "url3" },
+    ];
+    axios.get.mockResolvedValue({ data: characters });
+
+    const res = await request(app)
+      .get("/fav")
+      .query({ house: "Gryffindor", pageNumber: 1, pageSize: 1 })
+      .set("Authorization", `Bearer ${accessToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      message: "Data retrieved successfully",
+      totalItems: 2,
+      totalPages: 2,
+      currentPage: 1,
+      data: [
+        { id: "1", name: "Harry Potter", house: "Gryffindor", image: "url1" },
+      ],
+    });
+  });
+
+  it("should handle axios error in getAll", async () => {
+    axios.get.mockRejectedValue(new Error("Network error"));
+
+    const res = await request(app)
+      .get("/fav")
+      .set("Authorization", `Bearer ${accessToken}`);
+
+    expect(res.status).toBe(500);
+  });
+});
+
+describe("GET /fav (getAll)", () => {
+  it("should filter and paginate characters", async () => {
+    const characters = [
+      { id: "1", name: "Harry Potter", house: "Gryffindor", image: "url1" },
+      { id: "2", name: "Draco Malfoy", house: "Slytherin", image: "url2" },
+      { id: "3", name: "Hermione Granger", house: "Gryffindor", image: "url3" },
+    ];
+    axios.get.mockResolvedValue({ data: characters });
+
+    const res = await request(app)
+      .get("/fav")
+      .query({ house: "Gryffindor", pageNumber: 1, pageSize: 1 })
+      .set("Authorization", `Bearer ${accessToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      message: "Data retrieved successfully",
+      totalItems: 2,
+      totalPages: 2,
+      currentPage: 1,
+      data: [
+        { id: "1", name: "Harry Potter", house: "Gryffindor", image: "url1" },
+      ],
+    });
+  });
+
+  it("should return 500 if axios.get fails", async () => {
+    axios.get.mockRejectedValue(new Error("Network error"));
+
+    const res = await request(app)
+      .get("/fav")
+      .set("Authorization", `Bearer ${accessToken}`);
+
+    expect(res.status).toBe(500);
+  });
+});
+
 describe("POST /fav/:CharacterId", () => {
   it("should add a favorite character and return 201", async () => {
     axios.get.mockResolvedValue({ data: [mockCharacter] });
@@ -111,6 +185,7 @@ describe("POST /fav/:CharacterId", () => {
   });
 
   it("should return 400 if the character is already in favorites", async () => {
+    axios.get.mockResolvedValue({ data: [mockCharacter] });
     jest.spyOn(Favorite, "findOne").mockResolvedValue({ id: 1 });
 
     const res = await request(app)
@@ -126,35 +201,36 @@ describe("POST /fav/:CharacterId", () => {
 });
 
 describe("GET /fav", () => {
-  it("should retrieve all favorite characters", async () => {
-    jest.spyOn(Favorite, "findAll").mockResolvedValue([
-      {
-        id: 1,
-        CharacterId: mockCharacter.id,
-        characterName: mockCharacter.name,
-        house: mockCharacter.house,
-        imageUrl: mockCharacter.image,
-        UserId: mockUser.id,
-      },
-    ]);
-
-    const res = await request(app)
-      .get("/fav")
-      .set("Authorization", `Bearer ${accessToken}`);
-
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({
-      message: "Data retrieved successfully",
-      data: [
+  describe("GET /fav", () => {
+    it("should retrieve all favorite characters", async () => {
+      jest.spyOn(Favorite, "findAll").mockResolvedValue([
         {
-          id: 1,
-          CharacterId: mockCharacter.id,
-          characterName: mockCharacter.name,
-          house: mockCharacter.house,
-          imageUrl: mockCharacter.image,
-          UserId: mockUser.id,
+          id: "1",
+          name: "Harry Potter",
+          house: "Gryffindor",
+          image: "http://example.com/harry.jpg",
         },
-      ],
+      ]);
+
+      const res = await request(app)
+        .get("/fav")
+        .set("Authorization", `Bearer ${accessToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        message: "Data retrieved successfully",
+        totalItems: 1,
+        totalPages: 1,
+        currentPage: 1,
+        data: [
+          {
+            id: "1",
+            name: "Harry Potter",
+            house: "Gryffindor",
+            image: "http://example.com/harry.jpg",
+          },
+        ],
+      });
     });
   });
 });
@@ -266,5 +342,75 @@ describe("POST /fav/sortHat", () => {
 
     expect(res.status).toBe(400);
     expect(res.body).toEqual({ error: "Invalid input" });
+  });
+
+  describe("POST /fav/sortHat error scenarios", () => {
+    it("should return 400 if Groq response is invalid (no houseData)", async () => {
+      getGroqChatCompletion.mockResolvedValue({});
+
+      const res = await request(app)
+        .post("/fav/sortHat")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ answers: ["Bravery", "Loyalty", "Intelligence", "Ambition"] });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toEqual({ error: "Invalid Groq response" });
+    });
+
+    it("should return 400 if JSON.parse fails", async () => {
+      getGroqChatCompletion.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: "not a valid json",
+            },
+          },
+        ],
+      });
+
+      const res = await request(app)
+        .post("/fav/sortHat")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ answers: ["Bravery", "Loyalty", "Intelligence", "Ambition"] });
+
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe("POST /fav/sortHat error scenarios", () => {
+    it("should return 400 if Groq response does not contain choices", async () => {
+      getGroqChatCompletion.mockResolvedValue({});
+
+      const res = await request(app)
+        .post("/fav/sortHat")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ answers: ["A", "B", "C", "D"] });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toEqual({ error: "Invalid Groq response" });
+    });
+
+    it("should return 400 if parsedHouse.house is not a string", async () => {
+      getGroqChatCompletion.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                house: 123,
+                explanation: "Not a string",
+              }),
+            },
+          },
+        ],
+      });
+
+      const res = await request(app)
+        .post("/fav/sortHat")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ answers: ["A", "B", "C", "D"] });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toEqual({ error: "House must be a string" });
+    });
   });
 });
