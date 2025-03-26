@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const baseURL = "http://localhost:3000/fav";
+const baseURL = "https://wizardingworldip.franzzwan.site/fav";
 
 const initialState = {
   characters: [],

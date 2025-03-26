@@ -9,7 +9,7 @@ import {
   setCurrentPage,
 } from "../Store/charactersSlice";
 
-const baseURL = "http://localhost:3000/fav";
+const baseURL = "https://wizardingworldip.franzzwan.site/fav";
 
 export default function CharacterList() {
   const navigate = useNavigate();

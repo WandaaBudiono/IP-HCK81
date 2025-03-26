@@ -10,7 +10,7 @@ export default function Profile() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/users/profile", {
+      .get("https://wizardingworldip.franzzwan.site/users/profile", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },

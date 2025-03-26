@@ -18,7 +18,7 @@ export default function Question4() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/fav/sortHat",
+        "https://wizardingworldip.franzzwan.site/fav/sortHat",
         { answers: finalAnswers },
         {
           headers: {

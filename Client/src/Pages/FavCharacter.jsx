@@ -10,7 +10,7 @@ export default function Favorite() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/fav/user", {
+      .get("https://wizardingworldip.franzzwan.site/fav/user", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
@@ -27,11 +27,14 @@ export default function Favorite() {
 
   const handleRemoveFavorite = async (CharacterId) => {
     try {
-      await axios.delete(`http://localhost:3000/fav/${CharacterId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      });
+      await axios.delete(
+        `https://wizardingworldip.franzzwan.site/fav/${CharacterId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
       setFavorites((prev) =>
         prev.filter((fav) => fav.CharacterId !== CharacterId)
       );
