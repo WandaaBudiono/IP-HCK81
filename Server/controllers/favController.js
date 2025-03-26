@@ -1,7 +1,7 @@
 const { Favorite, User } = require("../models");
 const { Op } = require("sequelize");
 const axios = require("axios");
-const { getGroqChatCompletion } = require("../helper/groqhelper");
+const { getGroqChatCompletion } = require("../helper/groqHelper");
 require("dotenv").config();
 const { sendWelcomeEmail } = require("../helper/emailService");
 
