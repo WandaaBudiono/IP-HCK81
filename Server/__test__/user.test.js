@@ -24,7 +24,7 @@ describe("User Controller Tests", () => {
     jest.clearAllMocks();
   });
 
-  describe("POST /register", () => {
+  describe("POST /users/register", () => {
     it("should register a new user and return 201 status", async () => {
       const mockUser = {
         id: 1,
@@ -64,9 +64,22 @@ describe("User Controller Tests", () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ message: "All fields are required" });
     });
+
+    it("should return 500 if User.create throws an error", async () => {
+      User.create.mockRejectedValue(new Error("Create error"));
+
+      const response = await request(app).post("/users/register").send({
+        username: "testuser",
+        email: "test@example.com",
+        password: "password123",
+      });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ message: "Internal server error" });
+    });
   });
 
-  describe("POST /login", () => {
+  describe("POST /users/login", () => {
     it("should log in a user and return 200 status with access token", async () => {
       const mockUser = {
         id: 1,
@@ -84,9 +97,7 @@ describe("User Controller Tests", () => {
       });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        access_token: "mockedAccessToken",
-      });
+      expect(response.body).toEqual({ access_token: "mockedAccessToken" });
       expect(User.findOne).toHaveBeenCalledWith({
         where: { email: "test@example.com" },
       });
@@ -95,6 +106,24 @@ describe("User Controller Tests", () => {
         "hashedpassword"
       );
       expect(signToken).toHaveBeenCalledWith({ id: mockUser.id });
+    });
+
+    it("should return 400 if email is not provided", async () => {
+      const response = await request(app).post("/users/login").send({
+        password: "password123",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ message: "Email is required" });
+    });
+
+    it("should return 400 if password is not provided", async () => {
+      const response = await request(app).post("/users/login").send({
+        email: "test@example.com",
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ message: "Password is required" });
     });
 
     it("should return 401 if email is not found", async () => {
@@ -127,15 +156,29 @@ describe("User Controller Tests", () => {
       expect(response.status).toBe(401);
       expect(response.body).toEqual({ message: "Email/Password is Invalid" });
     });
+
+    it("should return 500 if an error occurs during login", async () => {
+      User.findOne.mockRejectedValue(new Error("Login error"));
+
+      const response = await request(app).post("/users/login").send({
+        email: "test@example.com",
+        password: "password123",
+      });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ message: "Internal server error" });
+    });
   });
 
-  describe("POST /googleLogin", () => {
+  describe("POST /users/googleLogin", () => {
     it("should create a new user via google and return 201 status", async () => {
       const fakePayload = {
         email: "googleuser@example.com",
         name: "Google User",
       };
-      fakeVerifyIdToken.mockResolvedValue({ getPayload: () => fakePayload });
+      fakeVerifyIdToken.mockResolvedValue({
+        getPayload: () => fakePayload,
+      });
 
       const mockUser = {
         id: 2,
@@ -145,9 +188,9 @@ describe("User Controller Tests", () => {
       User.findOrCreate.mockResolvedValue([mockUser, true]);
       signToken.mockReturnValue("googleAccessToken");
 
-      const response = await request(app).post("/users/googleLogin").send({
-        googleToken: "validGoogleToken",
-      });
+      const response = await request(app)
+        .post("/users/googleLogin")
+        .send({ googleToken: "validGoogleToken" });
 
       expect(response.status).toBe(201);
       expect(response.body).toEqual({
@@ -169,7 +212,9 @@ describe("User Controller Tests", () => {
         email: "existing@example.com",
         name: "Existing User",
       };
-      fakeVerifyIdToken.mockResolvedValue({ getPayload: () => fakePayload });
+      fakeVerifyIdToken.mockResolvedValue({
+        getPayload: () => fakePayload,
+      });
 
       const mockUser = {
         id: 3,
@@ -179,9 +224,9 @@ describe("User Controller Tests", () => {
       User.findOrCreate.mockResolvedValue([mockUser, false]);
       signToken.mockReturnValue("existingAccessToken");
 
-      const response = await request(app).post("/users/googleLogin").send({
-        googleToken: "validGoogleToken",
-      });
+      const response = await request(app)
+        .post("/users/googleLogin")
+        .send({ googleToken: "validGoogleToken" });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
@@ -201,9 +246,9 @@ describe("User Controller Tests", () => {
     it("should return 500 if an error occurs during google login", async () => {
       fakeVerifyIdToken.mockRejectedValue(new Error("Google Error"));
 
-      const response = await request(app).post("/users/googleLogin").send({
-        googleToken: "invalidToken",
-      });
+      const response = await request(app)
+        .post("/users/googleLogin")
+        .send({ googleToken: "invalidToken" });
 
       expect(response.status).toBe(500);
       expect(response.body).toEqual({ message: "Internal server error" });
@@ -240,6 +285,17 @@ describe("User Controller Tests", () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toEqual({ message: "User not found" });
+    });
+
+    it("should return 500 if an error occurs in getUserProfile", async () => {
+      User.findByPk.mockRejectedValue(new Error("Profile error"));
+
+      const response = await request(app)
+        .get("/users/profile")
+        .set("user-id", "1");
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ message: "Internal server error" });
     });
   });
 });
