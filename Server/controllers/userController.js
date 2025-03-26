@@ -85,7 +85,6 @@ module.exports = class userController {
           id: user.id,
           username: user.username,
           email: user.email,
-          picture: user.picture,
         },
       });
     } catch (error) {
