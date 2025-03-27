@@ -8,6 +8,7 @@ import {
   setHouseFilter,
   setCurrentPage,
 } from "../Store/charactersSlice";
+import Swal from "sweetalert2";
 
 const baseURL = "https://wizardingworldip.franzzwan.site/fav";
 
@@ -48,10 +49,16 @@ export default function CharacterPage() {
           },
         }
       );
-      alert("Character added to favorites!");
+      Swal.fire({
+        icon: "success",
+        text: "Character added to favorites!",
+      });
     } catch (err) {
       console.error(err);
-      alert("Failed to add favorite");
+      Swal.fire({
+        icon: "error",
+        text: "Failed to add favorite",
+      });
     }
   };
 

@@ -21,18 +21,23 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!form.username || !form.email || !form.password) {
+      Swal.fire({
+        icon: "warning",
+        title: "Validation Error",
+        text: "All fields are required!",
+      });
+      return;
+    }
     try {
       await phase2Api.post("/users/register", form);
       navigate("/login");
     } catch (error) {
       console.error(error);
-      let message = error.message || "Registration failed!";
-      if (error.response) {
-        message = error.response.data.message;
-      }
+      const message = error.response?.data?.message || "Registration failed!";
       Swal.fire({
         icon: "error",
-        title: error.response?.status,
+        title: error.response?.status || "Error",
         text: message,
       });
     }
