@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addAnswer } from "../../Store/sortingHatSlice";
+import { addAnswer, resetAnswers } from "../../Store/sortingHatSlice";
 import { useNavigate } from "react-router";
 import axios from "axios";
+import backgroundImage from "../../../public/assets/Question4.jpg";
 
 export default function Question4() {
   const [answer, setAnswer] = useState("");
@@ -11,14 +12,16 @@ export default function Question4() {
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    if (!answer.trim()) return alert("Please provide an answer!");
+    if (!answer.trim()) {
+      return alert("Please provide an answer!");
+    }
 
     dispatch(addAnswer(answer));
     const finalAnswers = [...answers, answer];
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/fav/sortHat",
+        "https://wizardingworldip.franzzwan.site/fav/sortHat",
         { answers: finalAnswers },
         {
           headers: {
@@ -26,11 +29,16 @@ export default function Question4() {
           },
         }
       );
-      alert(
-        `You got house: ${response.data.house}\nRedirecting to /character...`
-      );
+
+      const { house, explanation } = response.data;
       dispatch(resetAnswers());
-      navigate("/character");
+
+      if (!house) {
+        alert("Unknown house. Please try again!");
+        return;
+      }
+
+      navigate(`/house/${house.toLowerCase()}`, { state: { explanation } });
     } catch (err) {
       console.error(err);
       alert("Failed to submit answers");
@@ -38,20 +46,27 @@ export default function Question4() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">
-        4️⃣ What does your ideal friend look like?
-      </h1>
-      <textarea
-        className="textarea textarea-bordered w-full h-24"
-        placeholder="Type your answer..."
-        value={answer}
-        onChange={(e) => setAnswer(e.target.value)}
-      />
-      <div className="mt-4">
-        <button className="btn btn-primary" onClick={handleSubmit}>
-          Submit
-        </button>
+    <div
+      className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
+      style={{ backgroundImage: `url(${backgroundImage})` }}
+    >
+      <div className="absolute inset-0 bg-black opacity-60"></div>
+
+      <div className="relative z-10 w-full max-w-xl p-8 bg-gray-800/70 rounded shadow-lg text-white">
+        <h1 className="text-2xl font-bold mb-4">
+          4️⃣ What does your ideal friend look like?
+        </h1>
+        <textarea
+          className="textarea textarea-bordered w-full h-24 bg-gray-800 bg-opacity-70 text-white placeholder-gray-400 border-gray-600 focus:border-blue-500"
+          placeholder="Type your answer..."
+          value={answer}
+          onChange={(e) => setAnswer(e.target.value)}
+        />
+        <div className="mt-4 flex justify-end">
+          <button className="btn btn-primary" onClick={handleSubmit}>
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );

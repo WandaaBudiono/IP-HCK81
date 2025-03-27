@@ -11,7 +11,7 @@ export default function CharacterDetail() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3000/fav/${CharacterId}`, {
+      .get(`https://wizardingworldip.franzzwan.site/fav/${CharacterId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
