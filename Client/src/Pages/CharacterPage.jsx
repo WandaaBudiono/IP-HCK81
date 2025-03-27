@@ -11,18 +11,19 @@ import {
 
 const baseURL = "https://wizardingworldip.franzzwan.site/fav";
 
-export default function CharacterList() {
+export default function CharacterPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [searchInput, setSearchInput] = useState("");
 
-  const { characters, loading, error, searchQuery, houseFilter, pagination } =
-    useSelector((state) => state.characters);
+  const { characters, loading, error, houseFilter, pagination } = useSelector(
+    (state) => state.characters
+  );
 
   useEffect(() => {
     dispatch(fetchCharacters());
-  }, [dispatch, searchQuery, houseFilter, pagination.currentPage]);
+  }, [dispatch, searchInput, houseFilter, pagination.currentPage]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -67,6 +68,26 @@ export default function CharacterList() {
     { label: "Slytherin", value: "Slytherin" },
   ];
 
+  const getPageNumbers = () => {
+    const total = pagination.totalPages;
+    const current = pagination.currentPage;
+    const maxVisible = 5;
+    let pages = [];
+
+    let start = Math.max(current - Math.floor(maxVisible / 2), 1);
+    let end = start + maxVisible - 1;
+
+    if (end > total) {
+      end = total;
+      start = Math.max(end - maxVisible + 1, 1);
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
   return (
     <div className="p-4">
       <form
@@ -109,7 +130,7 @@ export default function CharacterList() {
                   <img
                     src={char.image}
                     alt={char.name}
-                    className="h-48 w-full object-cover"
+                    className="w-full max-h-80 object-contain"
                   />
                 </figure>
                 <div className="card-body">
@@ -141,7 +162,7 @@ export default function CharacterList() {
       )}
 
       {!loading && !error && pagination.totalPages > 1 && (
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center mt-6 items-center">
           <button
             className="btn btn-outline mr-2"
             disabled={pagination.currentPage === 1}
@@ -150,18 +171,48 @@ export default function CharacterList() {
             Previous
           </button>
 
-          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-            (num) => (
+          {/* Jika currentPage cukup jauh dari halaman pertama */}
+          {pagination.currentPage > 3 && (
+            <>
               <button
-                key={num}
                 className={`btn mx-1 ${
-                  pagination.currentPage === num ? "btn-primary" : "btn-outline"
+                  pagination.currentPage === 1 ? "btn-primary" : "btn-outline"
                 }`}
-                onClick={() => handlePageChange(num)}
+                onClick={() => handlePageChange(1)}
               >
-                {num}
+                1
               </button>
-            )
+              <span className="mx-1">...</span>
+            </>
+          )}
+
+          {getPageNumbers().map((num) => (
+            <button
+              key={num}
+              className={`btn mx-1 ${
+                pagination.currentPage === num ? "btn-primary" : "btn-outline"
+              }`}
+              onClick={() => handlePageChange(num)}
+            >
+              {num}
+            </button>
+          ))}
+
+          {/* Jika currentPage cukup jauh dari halaman terakhir */}
+          {pagination.currentPage < pagination.totalPages - 2 && (
+            <>
+              <span className="mx-1">...</span>
+              <button
+                className={`btn mx-1 ${
+                  pagination.currentPage === pagination.totalPages
+                    ? "btn-primary"
+                    : "btn-outline"
+                }`}
+                onClick={() => handlePageChange(pagination.totalPages)}
+              >
+                {pagination.totalPages}
+              </button>
+            </>
           )}
 
           <button

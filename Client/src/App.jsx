@@ -15,6 +15,10 @@ import Question1 from "./Pages/sortingHatWizard/Question1";
 import Question2 from "./Pages/sortingHatWizard/Question2";
 import Question3 from "./Pages/sortingHatWizard/Question3";
 import Question4 from "./Pages/sortingHatWizard/Question4";
+import GryffindorPage from "./Pages/house/GryffindorPage";
+import HufflepuffPage from "./Pages/house/HufflepuffPage";
+import RavenclawPage from "./Pages/house/RavenclawPage";
+import SlytherinPage from "./Pages/house/SlytherinPage";
 
 function App() {
   return (
@@ -57,6 +61,13 @@ function App() {
             <Route path="2" element={<Question2 />} />
             <Route path="3" element={<Question3 />} />
             <Route path="4" element={<Question4 />} />
+          </Route>
+
+          <Route path="/house" element={<AuthLayout />}>
+            <Route path="gryffindor" element={<GryffindorPage />} />
+            <Route path="hufflepuff" element={<HufflepuffPage />} />
+            <Route path="ravenclaw" element={<RavenclawPage />} />
+            <Route path="slytherin" element={<SlytherinPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

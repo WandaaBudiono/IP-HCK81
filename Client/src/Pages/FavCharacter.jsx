@@ -57,7 +57,7 @@ export default function Favorite() {
               <img
                 src={fav.imageUrl}
                 alt={fav.characterName}
-                className="h-48 w-full object-cover"
+                className="w-full max-h-80 object-contain"
               />
             </figure>
             <div className="card-body">
