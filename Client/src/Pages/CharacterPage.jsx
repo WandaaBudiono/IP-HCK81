@@ -17,13 +17,12 @@ export default function CharacterPage() {
 
   const [searchInput, setSearchInput] = useState("");
 
-  const { characters, loading, error, houseFilter, pagination } = useSelector(
-    (state) => state.characters
-  );
+  const { characters, loading, error, searchQuery, houseFilter, pagination } =
+    useSelector((state) => state.characters);
 
   useEffect(() => {
     dispatch(fetchCharacters());
-  }, [dispatch, searchInput, houseFilter, pagination.currentPage]);
+  }, [dispatch, searchQuery, houseFilter, pagination.currentPage]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -171,7 +170,6 @@ export default function CharacterPage() {
             Previous
           </button>
 
-          {/* Jika currentPage cukup jauh dari halaman pertama */}
           {pagination.currentPage > 3 && (
             <>
               <button
@@ -198,7 +196,6 @@ export default function CharacterPage() {
             </button>
           ))}
 
-          {/* Jika currentPage cukup jauh dari halaman terakhir */}
           {pagination.currentPage < pagination.totalPages - 2 && (
             <>
               <span className="mx-1">...</span>
