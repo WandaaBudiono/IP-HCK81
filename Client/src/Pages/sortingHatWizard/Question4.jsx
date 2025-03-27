@@ -4,6 +4,7 @@ import { addAnswer, resetAnswers } from "../../Store/sortingHatSlice";
 import { useNavigate } from "react-router";
 import axios from "axios";
 import backgroundImage from "../../../public/assets/Question4.jpg";
+import Swal from "sweetalert2";
 
 export default function Question4() {
   const [answer, setAnswer] = useState("");
@@ -11,9 +12,14 @@ export default function Question4() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (!answer.trim()) {
-      return alert("Please provide an answer!");
+      Swal.fire({
+        icon: "error",
+        text: "Please provide an answer",
+      });
+      return;
     }
 
     dispatch(addAnswer(answer));
@@ -34,14 +40,20 @@ export default function Question4() {
       dispatch(resetAnswers());
 
       if (!house) {
-        alert("Unknown house. Please try again!");
+        Swal.fire({
+          icon: "error",
+          text: "Uknown house, please try again",
+        });
         return;
       }
 
       navigate(`/house/${house.toLowerCase()}`, { state: { explanation } });
     } catch (err) {
       console.error(err);
-      alert("Failed to submit answers");
+      Swal.fire({
+        icon: "error",
+        text: "Failed to submit an answer",
+      });
     }
   };
 

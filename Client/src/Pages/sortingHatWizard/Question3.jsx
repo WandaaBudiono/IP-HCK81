@@ -2,15 +2,21 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addAnswer } from "../../Store/sortingHatSlice";
 import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
 
 export default function Question3() {
   const [answer, setAnswer] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleNext = () => {
+  const handleNext = (e) => {
+    e.preventDefault();
     if (!answer.trim()) {
-      return alert("Please provide an answer!");
+      Swal.fire({
+        icon: "error",
+        text: "Please provide an answer",
+      });
+      return;
     }
     dispatch(addAnswer(answer));
     navigate("/sorting-hat/4");

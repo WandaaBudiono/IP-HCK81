@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
 
 export default function Favorite() {
   const [favorites, setFavorites] = useState([]);
@@ -39,7 +40,10 @@ export default function Favorite() {
         prev.filter((fav) => fav.CharacterId !== CharacterId)
       );
     } catch (err) {
-      alert("Failed to remove favorite");
+      Swal.fire({
+        icon: "error",
+        text: "Failed to remove favorite",
+      });
       console.error(err);
     }
   };
