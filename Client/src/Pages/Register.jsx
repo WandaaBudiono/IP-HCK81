@@ -103,7 +103,6 @@ export default function Register() {
                   value={form.username}
                   onChange={handleChange}
                   placeholder="Enter username"
-                  required
                 />
               </div>
               <div className="form-control mb-3">
@@ -117,7 +116,6 @@ export default function Register() {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="Enter email address"
-                  required
                 />
               </div>
               <div className="form-control mb-4">
@@ -131,7 +129,6 @@ export default function Register() {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Enter password"
-                  required
                 />
               </div>
               <div className="form-control mt-4">
